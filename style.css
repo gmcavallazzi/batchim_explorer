@@ -101,6 +101,13 @@ input[type="text"] {
     outline: none;
 }
 
+.input-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding-right: 0.5rem;
+}
+
 /* ... existing code ... */
 
 .example-item {
@@ -305,6 +312,8 @@ footer {
     background: var(--bg-color);
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
+    white-space: nowrap;
+    /* Prevent badge wrapping */
 }
 
 .rule-description {
