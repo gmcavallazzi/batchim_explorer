@@ -322,48 +322,7 @@ footer {
     gap: 0.75rem;
 }
 
-.example-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: transform 0.1s;
-    padding: 0.25rem;
-    border-radius: 4px;
-}
-
-.example-item:hover {
-    background-color: var(--border);
-    transform: translateX(4px);
-}
-
-.ex-word {
-    font-weight: 700;
-    color: var(--text-main);
-    white-space: nowrap;
-    /* Prevent awkward wrapping */
-}
-
-.arrow {
-    color: var(--text-muted);
-    flex-shrink: 0;
-}
-
-.ex-sound {
-    font-family: monospace;
-    /* Distinction */
-    color: var(--accent);
-    white-space: nowrap;
-    /* Prevent awkward wrapping */
-}
-
-.ex-trans {
-    margin-left: auto;
-    font-style: italic;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
+/* Removed duplicate example styles to allow Grid layout to take effect */
 
 /* Virtual Keyboard */
 .keyboard-container {
@@ -676,5 +635,10 @@ footer {
 
     .input-wrapper {
         padding: 0.25rem;
+    }
+
+    input[type="text"] {
+        font-size: 1rem;
+        /* Smaller font on mobile to save space */
     }
 }
