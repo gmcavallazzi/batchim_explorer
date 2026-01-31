@@ -441,16 +441,27 @@ tabAnalyzer.addEventListener('click', () => switchTab('analyzer'));
 tabGame.addEventListener('click', () => switchTab('game'));
 
 function switchTab(tab) {
+    const mainTitle = document.querySelector('header h1');
+    const subtitle = document.querySelector('header .subtitle');
+
     if (tab === 'analyzer') {
         tabAnalyzer.classList.add('active');
         tabGame.classList.remove('active');
         viewAnalyzer.classList.remove('hidden');
         viewGame.classList.add('hidden');
+
+        // Update Header for Analyzer
+        mainTitle.textContent = 'Korean Batchim Explorer 🇰🇷';
+        subtitle.textContent = 'Type Hangul to see and hear sound changes';
     } else {
         tabGame.classList.add('active');
         tabAnalyzer.classList.remove('active');
         viewGame.classList.remove('hidden');
         viewAnalyzer.classList.add('hidden');
+
+        // Update Header for Game
+        mainTitle.textContent = 'Pronunciation Flashcards 🐯';
+        subtitle.textContent = 'Guess the sound, learn the rule!';
 
         if (!currentGameWord) {
             loadRandomWord();
@@ -483,6 +494,7 @@ function loadRandomWord() {
     gameCategory.classList.add('hidden'); // Hide hint by default
     gameWord.textContent = currentGameWord.word;
     gameTranslation.textContent = currentGameWord.trans;
+    gameTranslation.classList.add('hidden'); // Hide translation by default
 }
 
 function revealAnswer() {
@@ -490,6 +502,7 @@ function revealAnswer() {
 
     // Show Category Hint
     gameCategory.classList.remove('hidden');
+    gameTranslation.classList.remove('hidden');
 
     // Calculate Pronunciation
     const result = phonemizer.phonemize(currentGameWord.word);
