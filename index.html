@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korean Batchim Explorer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Korean Batchim Explorer</h1>
+            <p class="subtitle">Type Hangul to see and hear sound changes</p>
+
+            <nav class="main-nav">
+                <button id="tabAnalyzer" class="nav-tab active">Analyzer</button>
+                <button id="tabGame" class="nav-tab">Flashcards</button>
+            </nav>
+        </header>
+
+        <!-- View 1: Analyzer (Existing) -->
+        <main id="viewAnalyzer">
+            <section class="input-section">
+                <div class="input-wrapper">
+                    <input type="text" id="koreanInput" placeholder="예: 같이, 한국말, 독립..." autocomplete="off">
+                    <button id="keyboardToggle" aria-label="Toggle Keyboard" class="icon-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                            <path
+                                d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10">
+                            </path>
+                        </svg>
+                    </button>
+                    <button id="speakBtn" aria-label="Listen" class="icon-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="virtualKeyboard" class="keyboard-container hidden">
+                    <div class="keyboard-row">
+                        <button class="key">ㅂ</button><button class="key">ㅈ</button><button
+                            class="key">ㄷ</button><button class="key">ㄱ</button>
+                        <button class="key">ㅅ</button><button class="key">ㅛ</button><button
+                            class="key">ㅕ</button><button class="key">ㅑ</button>
+                        <button class="key">ㅐ</button><button class="key">ㅔ</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="key">ㅁ</button><button class="key">ㄴ</button><button
+                            class="key">ㅇ</button><button class="key">ㄹ</button>
+                        <button class="key">ㅎ</button><button class="key">ㅗ</button><button
+                            class="key">ㅓ</button><button class="key">ㅏ</button>
+                        <button class="key">ㅣ</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="key action-key" id="keyShift">Shift</button>
+                        <button class="key">ㅋ</button><button class="key">ㅌ</button><button
+                            class="key">ㅊ</button><button class="key">ㅍ</button>
+                        <button class="key">ㅠ</button><button class="key">ㅜ</button><button class="key">ㅡ</button>
+                        <button class="key action-key" id="keyBackspace">⌫</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="output-section">
+                <div class="card result-card">
+                    <h2>Pronunciation</h2>
+                    <div class="pronunciation-display">
+                        <span id="pronunciationOutput" class="hangul-large">...</span>
+                        <span id="romanizationOutput" class="romanization"></span>
+                    </div>
+                </div>
+
+                <div class="card rules-card">
+                    <h2>Applied Rules</h2>
+                    <ul id="rulesList" class="rules-list">
+                        <li class="empty-state">Start typing to see sound changes...</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="reference-section">
+                <h2>Quick Reference</h2>
+                <div class="chip-container">
+                    <button class="chip" data-example="같이">같이 (Palatalization)</button>
+                    <button class="chip" data-example="국물">국물 (Nasalization)</button>
+                    <button class="chip" data-example="입학">입학 (Aspiration)</button>
+                    <button class="chip" data-example="학교">학교 (Tensification)</button>
+                    <button class="chip" data-example="신라">신라 (Liquidization)</button>
+                    <button class="chip" data-example="없어">없어 (Resyllabification)</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- View 2: Flashcard Game (New) -->
+        <main id="viewGame" class="hidden">
+            <div class="card game-card">
+                <div class="game-content">
+                    <p class="game-category-badge" id="gameCategory">Category</p>
+                    <h2 id="gameWord" class="korean-word-large">준비</h2>
+                    <p id="gameTranslation" class="game-trans">Ready?</p>
+                </div>
+
+                <div id="gameAnswerArea" class="game-answer-area hidden">
+                    <div class="pronunciation-display centered">
+                        <span id="gamePronunciation" class="hangul-large text-accent">--</span>
+                        <!-- Use a dedicated speak button for game -->
+                        <button id="gameSpeakBtn" class="icon-btn small-btn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <ul id="gameRules" class="rules-list short-list"></ul>
+                </div>
+
+                <div class="game-controls">
+                    <button id="btnReveal" class="btn-primary">Reveal Pronunciation</button>
+                    <button id="btnNext" class="btn-secondary hidden">Next Word →</button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Runs offline using Browser Speech API.</p>
+        </footer>
+    </div>
+
+    <script src="hangul.js"></script>
+    <script src="dictionary.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
