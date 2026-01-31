@@ -17,7 +17,7 @@ const dictionary = [
     { word: '주세요', trans: 'Please give me', cat: 'Basic' },
 
     // ==========================================
-    // FOOD & DRINK (Updates)
+    // FOOD & DRINK
     // ==========================================
     { word: '김치', trans: 'Kimchi', cat: 'Food' },
     { word: '비빔밥', trans: 'Bibimbap', cat: 'Food (Tensification)' }, // [비빔빱]
@@ -35,30 +35,60 @@ const dictionary = [
     { word: '식당', trans: 'Restaurant', cat: 'Place (Tensification)' }, // [식땅]
     { word: '맛있어요', trans: 'Delicious', cat: 'Phrase (Liaison)' }, // [마시써요]
     { word: '먹고 싶어요', trans: 'I want to eat', cat: 'Phrase' },
+    { word: '사과', trans: 'Apple', cat: 'Food' },
+    { word: '우유', trans: 'Milk', cat: 'Food' },
+    { word: '빵', trans: 'Bread', cat: 'Food' },
 
     // ==========================================
-    // SINO-KOREAN NUMBERS (Phone, Money, Dates)
+    // ANIMALS (New!)
+    // ==========================================
+    { word: '고양이', trans: 'Cat', cat: 'Animal' },
+    { word: '강아지', trans: 'Puppy', cat: 'Animal' },
+    { word: '개', trans: 'Dog', cat: 'Animal' },
+    { word: '새', trans: 'Bird', cat: 'Animal' },
+    { word: '말', trans: 'Horse', cat: 'Animal' },
+    { word: '소', trans: 'Cow', cat: 'Animal' },
+    { word: '돼지', trans: 'Pig', cat: 'Animal' },
+    { word: '물고기', trans: 'Fish', cat: 'Animal' },
+    { word: '토끼', trans: 'Rabbit', cat: 'Animal (Tensification)' }, // [토끼]
+    { word: '호랑이', trans: 'Tiger', cat: 'Animal' },
+    { word: '곰', trans: 'Bear', cat: 'Animal' },
+
+    // ==========================================
+    // COLORS (New!)
+    // ==========================================
+    { word: '색깔', trans: 'Color', cat: 'Colors (Tensification)' }, // [색깔]
+    { word: '빨간색', trans: 'Red', cat: 'Colors' },
+    { word: '파란색', trans: 'Blue', cat: 'Colors' },
+    { word: '노란색', trans: 'Yellow', cat: 'Colors' },
+    { word: '검은색', trans: 'Black', cat: 'Colors (Liaison)' }, // [거믄색]
+    { word: '하얀색', trans: 'White', cat: 'Colors' },
+    { word: '초록색', trans: 'Green', cat: 'Colors' },
+    { word: '보라색', trans: 'Purple', cat: 'Colors' },
+
+    // ==========================================
+    // SINO-KOREAN NUMBERS
     // ==========================================
     { word: '일', trans: 'One (1)', cat: 'Number (Sino)' },
     { word: '이', trans: 'Two (2)', cat: 'Number (Sino)' },
     { word: '삼', trans: 'Three (3)', cat: 'Number (Sino)' },
     { word: '사', trans: 'Four (4)', cat: 'Number (Sino)' },
     { word: '오', trans: 'Five (5)', cat: 'Number (Sino)' },
-    { word: '육', trans: 'Six (6)', cat: 'Number (Sino)' }, // Special rule for liaison often applies
+    { word: '육', trans: 'Six (6)', cat: 'Number (Sino)' },
     { word: '칠', trans: 'Seven (7)', cat: 'Number (Sino)' },
     { word: '팔', trans: 'Eight (8)', cat: 'Number (Sino)' },
     { word: '구', trans: 'Nine (9)', cat: 'Number (Sino)' },
     { word: '십', trans: 'Ten (10)', cat: 'Number (Sino)' },
     { word: '십일', trans: 'Eleven (11)', cat: 'Number (Sino - Liaison)' }, // [시빌]
     { word: '십이', trans: 'Twelve (12)', cat: 'Number (Sino - Liaison)' }, // [시비]
-    { word: '십육', trans: 'Sixteen (16)', cat: 'Number (Sino - Nasalization)' }, // [심뉵] -> Special Case!
+    { word: '십육', trans: 'Sixteen (16)', cat: 'Number (Sino - Nasalization)' }, // [심뉵]
     { word: '이십', trans: 'Twenty (20)', cat: 'Number (Sino)' },
     { word: '백', trans: 'Hundred (100)', cat: 'Number (Sino)' },
     { word: '천', trans: 'Thousand (1,000)', cat: 'Number (Sino)' },
     { word: '만', trans: 'Ten Thousand (10,000)', cat: 'Number (Sino)' },
 
     // ==========================================
-    // NATIVE KOREAN NUMBERS (Counting items/age)
+    // NATIVE KOREAN NUMBERS
     // ==========================================
     { word: '하나', trans: 'One', cat: 'Number (Native)' },
     { word: '둘', trans: 'Two', cat: 'Number (Native)' },
@@ -127,6 +157,8 @@ const dictionary = [
     { word: '기다려요', trans: 'Wait', cat: 'Verb' },
     { word: '알아요', trans: 'Know', cat: 'Verb (Liaison)' }, // [아라요]
     { word: '몰라요', trans: 'Don\'t Know', cat: 'Verb' },
+    { word: '닫아요', trans: 'Close', cat: 'Verb (Liaison)' }, // [다다요]
+    { word: '열어요', trans: 'Open', cat: 'Verb (Liaison)' }, // [여러요]
 
     // ==========================================
     // ADJECTIVES
@@ -169,7 +201,7 @@ const dictionary = [
     { word: '해돋이', trans: 'Sunrise', cat: 'Palatalization' }, // [해도지]
     { word: '맏이', trans: 'First born', cat: 'Palatalization' }, // [마지]
     { word: '붙이다', trans: 'To stick/attach', cat: 'Palatalization' }, // [부치다]
-    { word: '닫히다', trans: 'To be closed', cat: 'Palatalization' }, // [다치다] (Aspiration + Palatalization)
+    { word: '닫히다', trans: 'To be closed', cat: 'Palatalization' }, // [다치다]
 
     // ==========================================
     // ASPIRATION (격음화) CHALLENGE
