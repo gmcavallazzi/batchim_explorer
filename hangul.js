@@ -14,6 +14,18 @@ const CHOSEONG = [
     'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
 ];
 
+// Exceptions for Palatalization (Native words where 'di/ti' sounds are preserved)
+// No longer needed due to structural check.
+
+// Common Pronunciation Exceptions (Dictionary-level overrides)
+const COMMON_EXCEPTIONS = {
+    '맛있다': { pronounced: '마시따', rule: 'Exception (Accepted Pronunciation)', desc: 'Standard allowance: [마딛따] is the rule, but [마시따] is widely accepted.' },
+    '멋있다': { pronounced: '머시따', rule: 'Exception (Accepted Pronunciation)', desc: 'Standard allowance: [머딛따] is the rule, but [머시따] is widely accepted.' },
+    '꽃잎': { pronounced: '꼰닙', rule: 'Compound Word Exception', desc: 'ㄴ-Insertion rule applies in this compound word.' },
+    '깻잎': { pronounced: '깬닙', rule: 'Compound Word Exception', desc: 'ㄴ-Insertion rule applies in this compound word.' },
+    '나뭇잎': { pronounced: '나문닙', rule: 'Compound Word Exception', desc: 'ㄴ-Insertion rule applies in this compound word.' }
+};
+
 const JUNGSEONG = [
     'ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ'
 ];
@@ -94,8 +106,20 @@ class KoreanPhonemizer {
     }
 
     // Main function to process a sentence
-    phonemize(text) {
+    phonemize(text, options = {}) {
         this.reset();
+        this.options = { ...options, originalText: text };
+
+        // 0. Check Common Exceptions (Full Word Match)
+        if (COMMON_EXCEPTIONS[text]) {
+            const ex = COMMON_EXCEPTIONS[text];
+            this.addLog(0, ex.rule, ex.desc);
+            return {
+                original: text,
+                pronounced: ex.pronounced,
+                explanations: this.log
+            };
+        }
 
         // 1. Convert text to array of decomposed syllables
         let context = [];
@@ -108,41 +132,23 @@ class KoreanPhonemizer {
             }
         }
 
-        let changed = true;
-        let iterations = 0;
-        const MAX_ITERATIONS = 5; // Prevent infinite loops
-
-        // We apply rules in passes. Some rules feed into others.
-        // A standard order is often:
-        // 1. Resyllabification (Liason)
-        // 2. Palatalization
-        // 3. Tensification
-        // 4. Nasalization
-        // 5. Liquorization (Liquidization)
-        // 6. Aspiration (H-merger)
-        // Note: The order varies by linguistic theory, but we will try to mimic standard output.
-
-        // For simplicity in this tool, we will just perform a linear scan looking for specific interactions
-        // and transforming the `context` array in place.
+        // Rule Application Order
 
         // Pass 1: Syllable Boundary Effects (Resyllabification & H-reduction)
         this.applyResyllabification(context);
 
-        // Pass 2: Palatalization (Must happen before minimalization of T sound)
-        this.applyPalatalization(context);
-
-        // Pass 3: Aspiration (H merging)
+        // Pass 2: Aspiration (H merging)
+        // Must happen BEFORE Palatalization to handle cases like 닫히다 -> 다티다 -> 다치다
         this.applyAspiration(context);
 
-        // Pass 4: Representative Sounds (normalization before assimilation)
-        // This is tricky because assimilation happens *based* on representative sounds often.
-        // We will do on-the-fly representative checks in assimilation or normalize first.
-        // Let's create a temporary "sound" view for assimilation checks.
+        // Pass 3: Palatalization
+        // Now processes result of aspiration (e.g., if T sound was created)
+        this.applyPalatalization(context);
 
-        // Pass 5: Assimilation (Nasalization, Liquidization)
+        // Pass 4: Assimilation (Nasalization, Liquidization)
         this.applyAssimilation(context);
 
-        // Pass 6: Tensification
+        // Pass 5: Tensification
         this.applyTensification(context);
 
         // Finally, normalize any remaining complex batchim that weren't linked
@@ -172,10 +178,6 @@ class KoreanPhonemizer {
 
             if (curr.type !== 'HANGUL' || next.type !== 'HANGUL') continue;
 
-            // Rule: If current has JONG and next has NO CHO (starts with ㅇ)
-            // Empty onset is index 11 ('ㅇ') in CHOSEONG? No wait.
-            // CHOSEONG: 'ㅇ' is index 11.
-
             if (curr.jong !== 0 && next.cho === 11) {
                 // Special case: ㅎ (27 in JONG) often drops or weakens, but generally moves over if not ㅎ.
                 // If it is ㅎ(27), it often drops in spoken Korean between voiced sounds, but strictly resyllabifies or aspirates.
@@ -190,12 +192,6 @@ class KoreanPhonemizer {
                     // Do nothing, NG stays.
                 }
                 else {
-                    // Standard liaison
-                    // Move Jong to Next Cho
-                    // If complex batchim? e.g. 넋이 -> 넉시. Left stays, Right moves.
-                    // We need to map JONG index to the CHOSEONG index.
-                    // This creates a mapping problem: JONG indices != CHO indices.
-
                     const jongChar = JONGSEONG[curr.jong];
 
                     // Handle Complex Batchim splitting
@@ -224,17 +220,7 @@ class KoreanPhonemizer {
                         next.cho = this.getChoIndex(this.tensify(move)); // Oftentimes moved consonant tensifies? No, just moves. e.g. 값이 -> 갑씨 (yes tensifies mostly for ㅅ)
                     } else {
                         // Simple Batchim
-                        // Determine the Choseong equivalent of the Jongseong
                         let targetChar = jongChar;
-
-                        // Special handling:
-                        // ㄷ, ㅌ, ㅅ, ㅆ, ㅈ, ㅊ -> All move as their own sound, EXCEPT when palatalization applies (handled separately usually, but liaison happens first).
-                        // Note: If ㄷ meets 이, it becomes 지 (Palatalization). That is distinct.
-                        // Standard liaison: 
-                        // 옷이 -> 오시 (s moves)
-                        // 꽃이 -> 꼬치 (ch moves)
-                        // 부엌이 -> 부어키 (k moves)
-
                         this.addLog(i, "Resyllabification", `${jongChar} moves to replace the empty initial sound.`);
                         curr.jong = 0;
                         next.cho = this.getChoIndex(targetChar);
@@ -250,19 +236,24 @@ class KoreanPhonemizer {
             const next = ctx[i + 1];
             if (curr.type !== 'HANGUL' || next.type !== 'HANGUL') continue;
 
-            // Pattern: Ending in ㄷ(7) or ㅌ(25) + Next starts with 이(O-cho + I-jung) or similar y-vowels.
-            // Wait, liaison already moved them? 
-            // If we ran resyllabification first, `굳이` -> `구디`.
-            // Now we check `구디`. `D` sound + `I` vowel. 
-            // Palatalization rule: ㄷ+이 -> 지, ㅌ+이 -> 치.
-            // BUT strict rule order: Palatalization happens *instead* of normal liaison or *during* it.
-            // If I already moved it to `next.cho`, I check next.cho + next.jung.
-
             const targetCho = CHOSEONG[next.cho];
             const targetJung = JUNGSEONG[next.jung];
 
+            // Structural Check: Did this 'ㄷ' or 'ㅌ' come from the original writing?
+            // If the user literally wrote '디' or '티', we assume they want that sound 
+            // (e.g., '잔디', '티끌', '라디오'). Palatalization is a change rule, not a reading rule for these.
+
+            const originalNext = decompose(next.original);
+            if (originalNext) { // Should exist
+                const originalChoChar = CHOSEONG[originalNext.cho];
+                // If original onset was explicitly ㄷ or ㅌ, do NOT palatalize.
+                if (['ㄷ', 'ㅌ'].includes(originalChoChar)) {
+                    continue;
+                }
+            }
+
             // Check for ㄷ -> ㅈ
-            if (targetCho === 'ㄷ' && targetJung.startsWith('ㅣ')) { // ㅣ, ㅑ, ㅕ, etc are y-based? Strictly usually just 'ㅣ' in textbook examples.
+            if (targetCho === 'ㄷ' && targetJung.startsWith('ㅣ')) {
                 this.addLog(i + 1, "Palatalization", `ㄷ becomes ㅈ before ${targetJung}.`);
                 next.cho = this.getChoIndex('ㅈ');
             }
@@ -271,17 +262,12 @@ class KoreanPhonemizer {
                 this.addLog(i + 1, "Palatalization", `ㅌ becomes ㅊ before ${targetJung}.`);
                 next.cho = this.getChoIndex('ㅊ');
             }
-            // Also ㄾ in batchim? 훑이다 -> 훌치다.
-            // Handled if liaison splits ㄾ -> ㄹ, ㅌ. Then ㅌ becomes ㅊ. (Covered above).
         }
     }
 
     // Simplistic Tensification of moved ㅅ?
-    // 옷이 -> 오시 (Not tensified).
-    // 값이 -> 갑씨 (Tensified).
     tensify(char) {
         const map = { 'ㅅ': 'ㅆ' }; // Mostly just s -> ss in complex batchim liaison?
-        // Actually linguistic rule: When complex batchim ends in ㅅ (ㅄ, ㄳ, ㄽ), the moved ㅅ becomes ㅆ.
         return map[char] || char;
     }
 
@@ -291,33 +277,34 @@ class KoreanPhonemizer {
             const next = ctx[i + 1];
             if (curr.type !== 'HANGUL' || next.type !== 'HANGUL') continue;
 
-            // Case 1: Batchim ㅎ + lenis stop (ㄱ, ㄷ, ㅂ, ㅈ)
-            // Case 2: Lenis stop batchim + Initial ㅎ
-
             const currJongChar = JONGSEONG[curr.jong]; // Could be 0
             const nextChoChar = CHOSEONG[next.cho];
-
-            // 1. Batchim ㅎ(27) or ㄶ(6), ㅀ(15)
-            // But complex batchim logic might have handled ㄶ/ㅀ if vowel followed. Here we care if Consonant follows.
-            // e.g. 놓고 -> 노코
 
             let hSource = null;
             let target = null;
             let direction = null; // 'forward' or 'backward'
 
+            // Forward: ㅎ + Stop
             if (['ㅎ', 'ㄶ', 'ㅀ'].includes(currJongChar) && ['ㄱ', 'ㄷ', 'ㅂ', 'ㅈ'].includes(nextChoChar)) {
-                // Forward Aspiration
                 hSource = curr;
                 target = next;
                 direction = 'forward';
-            } else if (['ㄱ', 'ㄷ', 'ㅂ', 'ㅈ'].includes(this.toRepresentative(currJongChar)) && nextChoChar === 'ㅎ') {
-                // Backward Aspiration: e.g. 축하 -> 추카
-                // Note: We need to check if the batchim *can* aspire.
-                // ㄱ, ㄷ, ㅂ, ㅈ (and their clusters ending in them?)
-                // Simplification: use representative check.
-                hSource = next;
-                target = curr; // Target of change is actually the combination.
-                direction = 'backward';
+            } else {
+                // Backward: Stop (or complex stop) + ㅎ
+                // Check if batchim contains a stop that can merge with ㅎ
+                let baseSound = this.toRepresentative(currJongChar);
+
+                // Special handling for complex batchim that have a stop but different representative
+                const complexStops = { 'ㄵ': 'ㅈ', 'ㄼ': 'ㅂ', 'ㄾ': 'ㅌ' };
+                if (complexStops[currJongChar]) {
+                    baseSound = complexStops[currJongChar];
+                }
+
+                if (['ㄱ', 'ㄷ', 'ㅂ', 'ㅈ'].includes(baseSound) && nextChoChar === 'ㅎ') {
+                    hSource = next;
+                    target = curr;
+                    direction = 'backward';
+                }
             }
 
             if (direction) {
@@ -331,18 +318,21 @@ class KoreanPhonemizer {
                     curr.jong = (['ㄶ', 'ㅀ'].includes(currJongChar)) ? this.getJongIndex(currJongChar === 'ㄶ' ? 'ㄴ' : 'ㄹ') : 0; // Reduce batchim
                     next.cho = this.getChoIndex(aspirate);
                 } else {
-                    // Backward: 축하 -> 추카
-                    // curr loses batchim (becomes empty/moved), next H becomes Aspirated.
-                    // Wait, 축하 -> chu-ka. The k moves to next.
-                    const base = this.toRepresentative(currJongChar); // This gets the Stop sound.
-                    if (pairs[base]) {
-                        const aspirate = pairs[base];
+                    // Backward
+                    let baseSound = this.toRepresentative(currJongChar);
+                    const complexStops = { 'ㄵ': 'ㅈ', 'ㄼ': 'ㅂ', 'ㄾ': 'ㅌ' };
+                    if (complexStops[currJongChar]) baseSound = complexStops[currJongChar];
+
+                    if (pairs[baseSound]) {
+                        const aspirate = pairs[baseSound];
                         this.addLog(i, "Aspiration", `${currJongChar} merges with ㅎ to form ${aspirate}.`);
 
-                        // Remove batchim from current
-                        // Handle complex? 닭하 -> 달카? (lg + h -> l + k_asp)
-                        // For now assume simple or representative.
-                        const complexMap = { 'ㄺ': 'ㄹ', 'ㄼ': 'ㄹ' }; // simple
+                        // Remove batchim from current, keeping remainder if complex
+                        const complexMap = {
+                            'ㄺ': 'ㄹ', 'ㄼ': 'ㄹ',
+                            'ㄵ': 'ㄴ', 'ㄾ': 'ㄹ'
+                        };
+
                         if (complexMap[currJongChar]) {
                             curr.jong = this.getJongIndex(complexMap[currJongChar]);
                         } else {

@@ -143,22 +143,22 @@ const dictionary = [
     // ==========================================
     // COMMON VERBS (Conjugated)
     // ==========================================
-    { word: '가요', trans: 'Go', cat: 'Verb' },
-    { word: '와요', trans: 'Come', cat: 'Verb' },
-    { word: '먹어요', trans: 'Eat', cat: 'Verb (Liaison)' }, // [머거요]
-    { word: '마셔요', trans: 'Drink', cat: 'Verb' },
-    { word: '봐요', trans: 'See/Watch', cat: 'Verb' },
-    { word: '들어요', trans: 'Listen', cat: 'Verb (Liaison)' }, // [드러요]
-    { word: '해요', trans: 'Do', cat: 'Verb' },
-    { word: '자요', trans: 'Sleep', cat: 'Verb' },
-    { word: '일어나요', trans: 'Wake up', cat: 'Verb (Liaison)' }, // [이러나요]
-    { word: '만나요', trans: 'Meet', cat: 'Verb' },
-    { word: '배워요', trans: 'Learn', cat: 'Verb' },
-    { word: '기다려요', trans: 'Wait', cat: 'Verb' },
-    { word: '알아요', trans: 'Know', cat: 'Verb (Liaison)' }, // [아라요]
-    { word: '몰라요', trans: 'Don\'t Know', cat: 'Verb' },
-    { word: '닫아요', trans: 'Close', cat: 'Verb (Liaison)' }, // [다다요]
-    { word: '열어요', trans: 'Open', cat: 'Verb (Liaison)' }, // [여러요]
+    { word: '가요', trans: 'Go', cat: 'Verb', isVerb: true },
+    { word: '와요', trans: 'Come', cat: 'Verb', isVerb: true },
+    { word: '먹어요', trans: 'Eat', cat: 'Verb (Liaison)', isVerb: true }, // [머거요]
+    { word: '마셔요', trans: 'Drink', cat: 'Verb', isVerb: true },
+    { word: '봐요', trans: 'See/Watch', cat: 'Verb', isVerb: true },
+    { word: '들어요', trans: 'Listen', cat: 'Verb (Liaison)', isVerb: true }, // [드러요]
+    { word: '해요', trans: 'Do', cat: 'Verb', isVerb: true },
+    { word: '자요', trans: 'Sleep', cat: 'Verb', isVerb: true },
+    { word: '일어나요', trans: 'Wake up', cat: 'Verb (Liaison)', isVerb: true }, // [이러나요]
+    { word: '만나요', trans: 'Meet', cat: 'Verb', isVerb: true },
+    { word: '배워요', trans: 'Learn', cat: 'Verb', isVerb: true },
+    { word: '기다려요', trans: 'Wait', cat: 'Verb', isVerb: true },
+    { word: '알아요', trans: 'Know', cat: 'Verb (Liaison)', isVerb: true }, // [아라요]
+    { word: '몰라요', trans: 'Don\'t Know', cat: 'Verb', isVerb: true },
+    { word: '닫아요', trans: 'Close', cat: 'Verb (Liaison)', isVerb: true }, // [다다요]
+    { word: '열어요', trans: 'Open', cat: 'Verb (Liaison)', isVerb: true }, // [여러요]
 
     // ==========================================
     // ADJECTIVES

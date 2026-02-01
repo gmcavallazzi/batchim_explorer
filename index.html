@@ -93,8 +93,10 @@
                     <button class="chip" data-example="입학">입학 (Aspiration)</button>
                     <button class="chip" data-example="학교">학교 (Tensification)</button>
                     <button class="chip" data-example="신라">신라 (Liquidization)</button>
-                    <button class="chip" data-example="없어">없어 (Resyllabification)</button>
+                    <button class="chip" data-example="없어">Resyllabification (없어)</button>
                 </div>
+
+
             </section>
         </main>
 
@@ -130,6 +132,20 @@
         </main>
 
         <footer>
+            <div class="disclaimer">
+                <h3>⚠️ Scope & Limitations</h3>
+                <p>This tool analyzes pronunciation based on standard surface-level phonological rules. It follows
+                    the standard Korean pronunciation rules (Pyojun-eoreul) but has the following limitations:</p>
+                <ul>
+                    <li><strong>Compound Words:</strong> Words formed by two nouns (e.g., <code>꽃잎</code>) often
+                        have irregular sounds inserted (Sai-siot / ㄴ-insertion) based on etymology, which this
+                        rule-based engine cannot predict without a full dictionary.</li>
+                    <li><strong>Irregular Tensification:</strong> Some Hanja words (e.g., <code>문법</code>) harden
+                        irregularly.</li>
+                    <li><strong>Vowel Length:</strong> Long vs. Short vowel distinctions are not shown.</li>
+                </ul>
+                <p><em>Note: Common exceptions like <code>맛있다</code> are manually handled.</em></p>
+            </div>
             <!-- Offline Mode Active -->
         </footer>
     </div>

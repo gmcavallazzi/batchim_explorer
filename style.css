@@ -651,3 +651,55 @@ footer {
         /* Smaller font on mobile to save space */
     }
 }
+
+/* Disclaimer */
+.disclaimer {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius);
+    border-left: 4px solid var(--text-muted);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: left;
+}
+
+@media (prefers-color-scheme: dark) {
+    .disclaimer {
+        background: transparent;
+        border: none;
+        border-top: 1px solid var(--border);
+        border-radius: 0;
+        padding-left: 0;
+        padding-right: 0;
+        border-left: none;
+    }
+}
+
+.disclaimer h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.9;
+}
+
+.disclaimer ul {
+    margin: 0.5rem 0 1rem 1.25rem;
+    list-style-type: disc;
+}
+
+.disclaimer li {
+    margin-bottom: 0.25rem;
+    opacity: 0.8;
+}
+
+.disclaimer code {
+    background: rgba(125, 125, 125, 0.1);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-weight: 600;
+}

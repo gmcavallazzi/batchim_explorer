@@ -505,7 +505,7 @@ function revealAnswer() {
     gameTranslation.classList.remove('hidden');
 
     // Calculate Pronunciation
-    const result = phonemizer.phonemize(currentGameWord.word);
+    const result = phonemizer.phonemize(currentGameWord.word, { isVerb: currentGameWord.isVerb });
 
     // Render Answer
     gamePronunciation.textContent = result.pronounced;
