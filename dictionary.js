@@ -139,6 +139,60 @@ const dictionary = [
     { word: '옆', trans: 'Side', cat: 'Direction' },
     { word: '오른쪽', trans: 'Right side', cat: 'Direction' },
     { word: '왼쪽', trans: 'Left side', cat: 'Direction' },
+    { word: '회사', trans: 'Company', cat: 'Place' },
+    { word: '시장', trans: 'Market', cat: 'Place' },
+    { word: '기차역', trans: 'Train Station', cat: 'Place' },
+    { word: '지하철역', trans: 'Subway Station', cat: 'Place' },
+    { word: '해변', trans: 'Beach', cat: 'Place' },
+    { word: '바다', trans: 'Sea', cat: 'Place' },
+    { word: '술집', trans: 'Bar', cat: 'Place' },
+    { word: '산', trans: 'Mountain', cat: 'Place' },
+    { word: '동물원', trans: 'Zoo', cat: 'Place' },
+    { word: '클럽', trans: 'Club', cat: 'Place' },
+    { word: '노래방', trans: 'Karaoke', cat: 'Place' },
+
+    // ==========================================
+    // NATIONALITIES & COUNTRIES
+    // ==========================================
+    { word: '한국', trans: 'Korea', cat: 'Country' },
+    { word: '미국', trans: 'USA', cat: 'Country' },
+    { word: '영국', trans: 'UK', cat: 'Country' },
+    { word: '호주', trans: 'Australia', cat: 'Country' },
+    { word: '프랑스', trans: 'France', cat: 'Country' },
+    { word: '독일', trans: 'Germany', cat: 'Country' },
+    { word: '이탈리아', trans: 'Italy', cat: 'Country' },
+    { word: '스페인', trans: 'Spain', cat: 'Country' },
+    { word: '러시아', trans: 'Russia', cat: 'Country' },
+    { word: '중국', trans: 'China', cat: 'Country' },
+    { word: '일본', trans: 'Japan', cat: 'Country' },
+    { word: '캐나다', trans: 'Canada', cat: 'Country' },
+    { word: '멕시코', trans: 'Mexico', cat: 'Country' },
+    { word: '인도', trans: 'India', cat: 'Country' },
+    { word: '베트남', trans: 'Vietnam', cat: 'Country' },
+    { word: '태국', trans: 'Thailand', cat: 'Country' },
+    { word: '몽골', trans: 'Mongolia', cat: 'Country' },
+    { word: '브라질', trans: 'Brazil', cat: 'Country' },
+    { word: '사람', trans: 'Person (Nationality marker, e.g. 미국 사람)', cat: 'Country' },
+
+    // ==========================================
+    // OCCUPATIONS
+    // ==========================================
+    { word: '학생', trans: 'Student', cat: 'Occupation' },
+    { word: '선생님', trans: 'Teacher', cat: 'Occupation' },
+    { word: '의사', trans: 'Doctor', cat: 'Occupation' },
+    { word: '경찰', trans: 'Police Officer', cat: 'Occupation' },
+    { word: '회사원', trans: 'Office Worker', cat: 'Occupation' },
+    { word: '공무원', trans: 'Public Servant', cat: 'Occupation' },
+    { word: '간호사', trans: 'Nurse', cat: 'Occupation' },
+    { word: '요리사', trans: 'Chef/Cook', cat: 'Occupation' },
+    { word: '가수', trans: 'Singer', cat: 'Occupation' },
+    { word: '배우', trans: 'Actor/Actress', cat: 'Occupation' },
+    { word: '엔지니어', trans: 'Engineer', cat: 'Occupation' },
+    { word: '변호사', trans: 'Lawyer', cat: 'Occupation' },
+    { word: '기자', trans: 'Journalist/Reporter', cat: 'Occupation' },
+    { word: '운전기사', trans: 'Driver', cat: 'Occupation' },
+    { word: '대학생', trans: 'University Student', cat: 'Occupation' },
+    { word: '직업', trans: 'Job/Occupation', cat: 'Occupation' },
 
     // ==========================================
     // COMMON VERBS (Conjugated)
@@ -159,6 +213,14 @@ const dictionary = [
     { word: '몰라요', trans: 'Don\'t Know', cat: 'Verb', isVerb: true },
     { word: '닫아요', trans: 'Close', cat: 'Verb (Liaison)', isVerb: true }, // [다다요]
     { word: '열어요', trans: 'Open', cat: 'Verb (Liaison)', isVerb: true }, // [여러요]
+    { word: '공부해요', trans: 'Study', cat: 'Verb', isVerb: true },
+    { word: '이야기해요', trans: 'Talk', cat: 'Verb', isVerb: true },
+    { word: '운동해요', trans: 'Exercise', cat: 'Verb', isVerb: true },
+    { word: '일해요', trans: 'Work', cat: 'Verb', isVerb: true },
+    { word: '전화해요', trans: 'Call', cat: 'Verb', isVerb: true },
+    { word: '받아요', trans: 'Receive', cat: 'Verb', isVerb: true },
+    { word: '읽어요', trans: 'Read', cat: 'Verb', isVerb: true },
+    { word: '줘요', trans: 'Give', cat: 'Verb', isVerb: true },
 
     // ==========================================
     // ADJECTIVES
