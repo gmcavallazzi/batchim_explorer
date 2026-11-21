@@ -13,14 +13,8 @@
         <header>
             <h1>Korean Batchim Explorer 🇰🇷</h1>
             <p class="subtitle">Type Hangul to see and hear sound changes</p>
-
-            <nav class="main-nav">
-                <button id="tabAnalyzer" class="nav-tab active">Analyzer 🇰🇷</button>
-                <button id="tabGame" class="nav-tab">Flashcards 🐯</button>
-            </nav>
         </header>
 
-        <!-- View 1: Analyzer (Existing) -->
         <main id="viewAnalyzer">
             <section class="input-section">
                 <div class="input-wrapper">
@@ -65,6 +59,9 @@
                         <button class="key">ㅠ</button><button class="key">ㅜ</button><button class="key">ㅡ</button>
                         <button class="key action-key" id="keyBackspace">⌫</button>
                     </div>
+                    <div class="keyboard-row">
+                        <button class="key action-key space-key" id="keySpace">Space</button>
+                    </div>
                 </div>
             </section>
 
@@ -73,7 +70,6 @@
                     <h2>Pronunciation</h2>
                     <div class="pronunciation-display">
                         <span id="pronunciationOutput" class="hangul-large">...</span>
-                        <span id="romanizationOutput" class="romanization"></span>
                     </div>
                 </div>
 
@@ -100,58 +96,33 @@
             </section>
         </main>
 
-        <!-- View 2: Flashcard Game (New) -->
-        <main id="viewGame" class="hidden">
-            <div class="card game-card">
-                <div class="game-content">
-                    <p class="game-category-badge" id="gameCategory">Category</p>
-                    <h2 id="gameWord" class="korean-word-large">준비</h2>
-                    <p id="gameTranslation" class="game-trans">Ready?</p>
-                </div>
-
-                <div id="gameAnswerArea" class="game-answer-area hidden">
-                    <div class="pronunciation-display centered">
-                        <span id="gamePronunciation" class="hangul-large text-accent">--</span>
-                        <!-- Use a dedicated speak button for game -->
-                        <button id="gameSpeakBtn" class="icon-btn small-btn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    <ul id="gameRules" class="rules-list short-list"></ul>
-                </div>
-
-                <div class="game-controls">
-                    <button id="btnReveal" class="btn-primary">Reveal Pronunciation</button>
-                    <button id="btnNext" class="btn-secondary hidden">Next Word →</button>
-                </div>
-            </div>
-        </main>
-
         <footer>
             <div class="disclaimer">
                 <h3>⚠️ Scope & Limitations</h3>
-                <p>This tool analyzes pronunciation based on standard surface-level phonological rules. It follows
-                    the standard Korean pronunciation rules (Pyojun-eoreul) but has the following limitations:</p>
+                <p>This tool applies the regular sound-change rules of the Korean standard pronunciation rules
+                    (표준 발음법). It works out how a written word is pronounced; it does not know what the word means.
+                    Keep these limits in mind:</p>
                 <ul>
-                    <li><strong>Compound Words:</strong> Words formed by two nouns (e.g., <code>꽃잎</code>) often
-                        have irregular sounds inserted (Sai-siot / ㄴ-insertion) based on etymology, which this
-                        rule-based engine cannot predict without a full dictionary.</li>
-                    <li><strong>Irregular Tensification:</strong> Some Hanja words (e.g., <code>문법</code>) harden
-                        irregularly.</li>
-                    <li><strong>Vowel Length:</strong> Long vs. Short vowel distinctions are not shown.</li>
+                    <li><strong>One word at a time:</strong> each word (text between spaces) is analysed on its own.
+                        In fluent speech sounds also change across word boundaries (못 해요 → [모태요]).</li>
+                    <li><strong>Compound words:</strong> words made of two parts (e.g. <code>꽃잎</code>,
+                        <code>한여름</code>) often gain an extra sound (ㄴ-insertion or 사이시옷) that depends on
+                        the word's origin. Only the common cases listed in the tool are handled.</li>
+                    <li><strong>Irregular tensification:</strong> some words harden for historical reasons
+                        (e.g. <code>비빔밥</code> [비빔빱], <code>문법</code> [문뻡]). Only the listed cases are handled.</li>
+                    <li><strong>Verb stems ending in ㄴ or ㅁ:</strong> in verbs like <code>신다</code> [신따] and
+                        <code>감다</code> [감따] the next consonant hardens, but in other words it doesn't. The tool can't
+                        tell verbs from other words, so it leaves single ㄴ/ㅁ unchanged. Double batchim (앉다, 젊다)
+                        are handled.</li>
+                    <li><strong>Loanwords:</strong> words borrowed from other languages often don't follow the
+                        hardening rules (e.g. <code>멕시코</code> is [멕시코], not [멕씨코]).</li>
+                    <li><strong>Vowel length:</strong> long and short vowels are not shown.</li>
                 </ul>
-                <p><em>Note: Common exceptions like <code>맛있다</code> are manually handled.</em></p>
             </div>
-            <!-- Offline Mode Active -->
         </footer>
     </div>
 
     <script src="hangul.js"></script>
-    <script src="dictionary.js"></script>
     <script src="app.js"></script>
 </body>
 

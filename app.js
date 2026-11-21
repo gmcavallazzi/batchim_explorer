@@ -32,11 +32,9 @@ if (synth.onvoiceschanged !== undefined) {
 loadVoices(); // Try immediately too
 
 // Event Listeners
-inputInfo.addEventListener('input', (e) => {
-    // Sync buffer if user types directly (or pastes)
-    // Note: This is complex because we can't easily decompose existing text into jamos for the buffer.
-    // For simplicity, if user types normally, we clear the assembler buffer to avoid conflicts.
-    assembler.clear();
+inputInfo.addEventListener('input', () => {
+    // Keep the on-screen keyboard in sync with text typed or pasted directly
+    assembler.setText(inputInfo.value);
     handleInput();
 });
 
@@ -52,7 +50,9 @@ virtualKeyBoard.addEventListener('click', (e) => {
         const key = e.target;
         const char = key.innerText;
 
-        if (key.id === 'keyBackspace') {
+        if (key.id === 'keySpace') {
+            updateFromKeyboard(assembler.add(' '));
+        } else if (key.id === 'keyBackspace') {
             const newVal = assembler.backspace();
             updateFromKeyboard(newVal);
         } else if (key.id === 'keyShift') {
@@ -97,29 +97,20 @@ function toggleShift() {
 }
 
 function updateFromKeyboard(text) {
-    // We strictly append the assembled text?
-    // The assembler maintains the WHOLE string buffer?
-    // Yes, assembler.add() returns result of ALL buffer.
-    // But we might have mixed content if user typed elsewhere.
-    // SIMPLIFICATION: The virtual keyboard owns the input when used.
-    // Whatever is in assembler IS the input.
+    // The assembler holds the whole input as keystrokes, so its output is the full text
     inputInfo.value = text;
     handleInput();
 }
 
+function loadExample(word) {
+    inputInfo.value = word;
+    assembler.setText(word);
+    handleInput();
+    speakCurrent();
+}
+
 chips.forEach(chip => {
-    chip.addEventListener('click', () => {
-        inputInfo.value = chip.dataset.example;
-        // Clear assembler since we loaded external text
-        assembler.clear();
-        // But we probably want to populate assembler with decomposed version of this text 
-        // if user wants to edit it?
-        // Decomposing full sentence to Jamos is doable but extra work.
-        // For now: Clicking chip resets "Typing Mode" to "Edit Mode". 
-        // Virtual keyboard will start fresh or need clear.
-        handleInput();
-        speakCurrent();
-    });
+    chip.addEventListener('click', () => loadExample(chip.dataset.example));
 });
 
 function handleInput() {
@@ -221,7 +212,7 @@ const rulesData = [
         id: 'palatalization',
         name: 'Palatalization',
         koreanName: '구개음화',
-        description: 'When ㄷ or ㅌ meets the vowel 이 (i), they change into their "soft" versions ㅈ and ㅊ respectively.',
+        description: 'When a final ㄷ or ㅌ is followed by the vowel 이 (or by 히), it is pronounced as ㅈ or ㅊ.',
         examples: [
             { word: '같이', sound: '가치', translation: 'Together' },
             { word: '굳이', sound: '구지', translation: 'Obstinately/Dare to' }
@@ -238,6 +229,17 @@ const rulesData = [
         ]
     },
     {
+        id: 'h-rules',
+        name: 'Final ㅎ',
+        koreanName: 'ㅎ 발음',
+        description: 'A final ㅎ (also in ㄶ, ㅀ) is silent before a vowel, and the consonant before it moves over. Before ㅅ it makes [ㅆ]; before ㄴ it is pronounced [ㄴ].',
+        examples: [
+            { word: '많이', sound: '마니', translation: 'A lot' },
+            { word: '좋습니다', sound: '조씀니다', translation: 'It is good (formal)' },
+            { word: '놓는', sound: '논는', translation: 'Putting' }
+        ]
+    },
+    {
         id: 'tensification',
         name: 'Tensification',
         koreanName: '경음화',
@@ -251,7 +253,7 @@ const rulesData = [
         id: 'liquidization',
         name: 'Liquidization',
         koreanName: '유음화',
-        description: 'When ㄴ and ㄹ meet, the ㄴ usually turns into ㄹ, making both sounds flow as a liquid L/R sound.',
+        description: 'When ㄴ and ㄹ meet (in either order), the ㄴ is pronounced as ㄹ, giving a long L sound. In some Sino-Korean compounds the ㄹ becomes ㄴ instead (생산량 [생산냥]).',
         examples: [
             { word: '신라', sound: '실라', translation: 'Silla (Dynasty)' },
             { word: '관리', sound: '괄리', translation: 'Management' }
@@ -297,9 +299,7 @@ function renderGlossary() {
             `;
             // Make example clickable to try
             exItem.addEventListener('click', () => {
-                inputInfo.value = ex.word;
-                handleInput();
-                speakCurrent();
+                loadExample(ex.word);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
             examplesBox.appendChild(exItem);
@@ -411,134 +411,3 @@ function renderBatchimTable() {
 // Initial Render
 renderGlossary();
 renderBatchimTable();
-
-// ============================================
-// Game Mode Logic
-// ============================================
-
-// Game State
-let currentGameWord = null;
-
-// DOM Elements for Game
-const tabAnalyzer = document.getElementById('tabAnalyzer');
-const tabGame = document.getElementById('tabGame');
-const viewAnalyzer = document.getElementById('viewAnalyzer');
-const viewGame = document.getElementById('viewGame');
-
-const gameCategory = document.getElementById('gameCategory');
-const gameWord = document.getElementById('gameWord');
-const gameTranslation = document.getElementById('gameTranslation');
-const gameAnswerArea = document.getElementById('gameAnswerArea');
-const gamePronunciation = document.getElementById('gamePronunciation');
-const gameSpeakBtn = document.getElementById('gameSpeakBtn');
-const gameRules = document.getElementById('gameRules');
-
-const btnReveal = document.getElementById('btnReveal');
-const btnNext = document.getElementById('btnNext');
-
-// Tab Switching
-tabAnalyzer.addEventListener('click', () => switchTab('analyzer'));
-tabGame.addEventListener('click', () => switchTab('game'));
-
-function switchTab(tab) {
-    const mainTitle = document.querySelector('header h1');
-    const subtitle = document.querySelector('header .subtitle');
-
-    if (tab === 'analyzer') {
-        tabAnalyzer.classList.add('active');
-        tabGame.classList.remove('active');
-        viewAnalyzer.classList.remove('hidden');
-        viewGame.classList.add('hidden');
-
-        // Update Header for Analyzer
-        mainTitle.textContent = 'Korean Batchim Explorer 🇰🇷';
-        subtitle.textContent = 'Type Hangul to see and hear sound changes';
-    } else {
-        tabGame.classList.add('active');
-        tabAnalyzer.classList.remove('active');
-        viewGame.classList.remove('hidden');
-        viewAnalyzer.classList.add('hidden');
-
-        // Update Header for Game
-        mainTitle.textContent = 'Pronunciation Flashcards 🐯';
-        subtitle.textContent = 'Guess the sound, learn the rule!';
-
-        if (!currentGameWord) {
-            loadRandomWord();
-        }
-    }
-}
-
-// Game Actions
-btnReveal.addEventListener('click', revealAnswer);
-btnNext.addEventListener('click', loadRandomWord);
-gameSpeakBtn.addEventListener('click', () => speakText(currentGameWord.word));
-
-function loadRandomWord() {
-    // Reset UI
-    gameAnswerArea.classList.add('hidden');
-    btnReveal.classList.remove('hidden');
-    btnNext.classList.add('hidden');
-
-    // Pick random word
-    // Ensure dictionary is loaded, fallback if not
-    const data = (typeof dictionary !== 'undefined') ? dictionary : [
-        { word: '오류', trans: 'Error: Dictionary not loaded', cat: 'Error' }
-    ];
-
-    const randomIdx = Math.floor(Math.random() * data.length);
-    currentGameWord = data[randomIdx];
-
-    // Render
-    gameCategory.textContent = currentGameWord.cat;
-    gameCategory.classList.add('hidden'); // Hide hint by default
-    gameWord.textContent = currentGameWord.word;
-    gameTranslation.textContent = currentGameWord.trans;
-    gameTranslation.classList.add('hidden'); // Hide translation by default
-}
-
-function revealAnswer() {
-    if (!currentGameWord) return;
-
-    // Show Category Hint
-    gameCategory.classList.remove('hidden');
-    gameTranslation.classList.remove('hidden');
-
-    // Calculate Pronunciation
-    const result = phonemizer.phonemize(currentGameWord.word, { isVerb: currentGameWord.isVerb });
-
-    // Render Answer
-    gamePronunciation.textContent = result.pronounced;
-
-    // Render Rules (Re-using render logic but for game list)
-    gameRules.innerHTML = '';
-    if (result.explanations.length === 0) {
-        gameRules.innerHTML = '<li class="empty-state">No special rules.</li>';
-    } else {
-        result.explanations.forEach(log => {
-            const li = document.createElement('li');
-            li.innerHTML = `<span class="rule-name">${log.rule}</span> <span class="rule-desc">${log.description}</span>`;
-            gameRules.appendChild(li);
-        });
-    }
-
-    // Update UI State
-    gameAnswerArea.classList.remove('hidden');
-    btnReveal.classList.add('hidden');
-    btnNext.classList.remove('hidden');
-
-    // Auto-play audio
-    speakText(currentGameWord.word);
-}
-
-function speakText(text) {
-    if (!text) return;
-    if (synth.speaking) synth.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    const korVoice = voices.find(v => v.lang.includes('ko'));
-    if (korVoice) utterance.voice = korVoice;
-    utterance.lang = 'ko-KR';
-    utterance.rate = 0.8;
-    synth.speak(utterance);
-}

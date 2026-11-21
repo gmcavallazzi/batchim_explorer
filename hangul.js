@@ -14,16 +14,26 @@ const CHOSEONG = [
     'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
 ];
 
-// Exceptions for Palatalization (Native words where 'di/ti' sounds are preserved)
-// No longer needed due to structural check.
-
-// Common Pronunciation Exceptions (Dictionary-level overrides)
+// Word-level overrides for pronunciations the regular rules can't predict.
+// Each entry: pronounced form, rule label, and an explanation shown to the user.
 const COMMON_EXCEPTIONS = {
-    '맛있다': { pronounced: '마시따', rule: 'Exception (Accepted Pronunciation)', desc: 'Standard allowance: [마딛따] is the rule, but [마시따] is widely accepted.' },
-    '멋있다': { pronounced: '머시따', rule: 'Exception (Accepted Pronunciation)', desc: 'Standard allowance: [머딛따] is the rule, but [머시따] is widely accepted.' },
-    '꽃잎': { pronounced: '꼰닙', rule: 'Compound Word Exception', desc: 'ㄴ-Insertion rule applies in this compound word.' },
-    '깻잎': { pronounced: '깬닙', rule: 'Compound Word Exception', desc: 'ㄴ-Insertion rule applies in this compound word.' },
-    '나뭇잎': { pronounced: '나문닙', rule: 'Compound Word Exception', desc: 'ㄴ-Insertion rule applies in this compound word.' }
+    '맛있다': { pronounced: '마싣따', rule: 'Two accepted pronunciations', desc: 'The standard rule gives [마딛따]; [마싣따] is also accepted and is what most people say.' },
+    '멋있다': { pronounced: '머싣따', rule: 'Two accepted pronunciations', desc: 'The standard rule gives [머딛따]; [머싣따] is also accepted and is what most people say.' },
+    '맛없다': { pronounced: '마덥따', rule: 'Word boundary', desc: '맛 + 없다: ㅅ is first pronounced [ㄷ] at the end of 맛, then moves over.' },
+    '겉옷': { pronounced: '거돋', rule: 'Word boundary', desc: '겉 + 옷: ㅌ is first pronounced [ㄷ] at the end of 겉, then moves over.' },
+    '꽃잎': { pronounced: '꼰닙', rule: 'ㄴ-insertion (compound)', desc: '꽃 + 잎: an extra ㄴ is inserted before 잎, then ㄷ becomes ㄴ.' },
+    '깻잎': { pronounced: '깬닙', rule: 'ㄴ-insertion (compound)', desc: '깨 + 잎: an extra ㄴ is inserted before 잎.' },
+    '나뭇잎': { pronounced: '나문닙', rule: 'ㄴ-insertion (compound)', desc: '나무 + 잎: an extra ㄴ is inserted before 잎.' },
+    '한여름': { pronounced: '한녀름', rule: 'ㄴ-insertion (compound)', desc: '한 + 여름: an extra ㄴ is inserted before 여.' },
+    '십육': { pronounced: '심뉵', rule: 'ㄴ-insertion + Nasalization', desc: '십 + 육: an extra ㄴ is inserted before 육, then ㅂ becomes ㅁ before ㄴ.' },
+    '지하철역': { pronounced: '지하철력', rule: 'ㄴ-insertion + Liquidization', desc: '지하철 + 역: an extra ㄴ is inserted before 역, then ㄹ + ㄴ becomes ㄹㄹ.' },
+    '비빔밥': { pronounced: '비빔빱', rule: 'Tensification (word-specific)', desc: 'In this compound the ㅂ of 밥 hardens to ㅃ.' },
+    '김밥': { pronounced: '김밥', rule: 'Two accepted pronunciations', desc: 'Both [김밥] and [김빱] are accepted.' },
+    '문법': { pronounced: '문뻡', rule: 'Tensification (word-specific)', desc: 'In this Sino-Korean word the ㅂ of 법 hardens to ㅃ.' },
+    '닭고기': { pronounced: '닥꼬기', rule: 'Complex batchim (noun)', desc: 'In nouns ㄺ is pronounced [ㄱ] before ㄱ. (In verbs it is [ㄹ]: 읽고 [일꼬].)' },
+    '생산량': { pronounced: '생산냥', rule: 'Nasalization of ㄹ', desc: 'In this compound the ㄹ becomes ㄴ instead of the ㄴ becoming ㄹ.' },
+    '의견란': { pronounced: '의견난', rule: 'Nasalization of ㄹ', desc: 'In this compound the ㄹ becomes ㄴ instead of the ㄴ becoming ㄹ.' },
+    '멕시코': { pronounced: '멕시코', rule: 'Loanword', desc: 'Loanwords usually keep plain consonants: no hardening of ㅅ.' }
 };
 
 const JUNGSEONG = [
@@ -106,20 +116,24 @@ class KoreanPhonemizer {
     }
 
     // Main function to process a sentence
-    phonemize(text, options = {}) {
+    phonemize(text) {
         this.reset();
-        this.options = { ...options, originalText: text };
 
-        // 0. Check Common Exceptions (Full Word Match)
-        if (COMMON_EXCEPTIONS[text]) {
-            const ex = COMMON_EXCEPTIONS[text];
-            this.addLog(0, ex.rule, ex.desc);
-            return {
-                original: text,
-                pronounced: ex.pronounced,
-                explanations: this.log
-            };
-        }
+        // Each word (text between spaces) is analysed on its own
+        const pronounced = text.split(/(\s+)/).map(part => {
+            if (!part || /^\s+$/.test(part)) return part;
+            const ex = COMMON_EXCEPTIONS[part];
+            if (ex) {
+                this.addLog(0, ex.rule, `${part}: ${ex.desc}`);
+                return ex.pronounced;
+            }
+            return this.phonemizeWord(part);
+        }).join('');
+
+        return { original: text, pronounced, explanations: this.log };
+    }
+
+    phonemizeWord(text) {
 
         // 1. Convert text to array of decomposed syllables
         let context = [];
@@ -164,11 +178,7 @@ class KoreanPhonemizer {
             }
         }
 
-        return {
-            original: text,
-            pronounced: result,
-            explanations: this.log
-        };
+        return result;
     }
 
     applyResyllabification(ctx) {
@@ -208,16 +218,16 @@ class KoreanPhonemizer {
 
                         // Handle ㅎ (h) in complex batchim followed by vowel
                         if (move === 'ㅎ') {
-                            // ㄶ, ㅀ -> h drops.
-                            this.addLog(i, "Resyllabification (Complex)", `${jongChar} splits, ㅎ is silent.`);
-                            curr.jong = this.getJongIndex(remain);
-                            // next remains unchanged (vowel start)
+                            // ㄶ, ㅀ + vowel: ㅎ is silent and ㄴ/ㄹ moves over (많이 → [마니])
+                            this.addLog(i, "ㅎ-Deletion + Resyllabification", `In ${jongChar}, ㅎ is silent before a vowel and ${remain} moves to the next syllable.`);
+                            curr.jong = 0;
+                            next.cho = this.getChoIndex(remain);
                             continue;
                         }
 
                         this.addLog(i, "Resyllabification (Complex)", `${jongChar} splits: ${remain} stays, ${move} moves to next syllable.`);
                         curr.jong = this.getJongIndex(remain);
-                        next.cho = this.getChoIndex(this.tensify(move)); // Oftentimes moved consonant tensifies? No, just moves. e.g. 값이 -> 갑씨 (yes tensifies mostly for ㅅ)
+                        next.cho = this.getChoIndex(this.tensify(move)); // a moved ㅅ hardens: 값이 → [갑씨]
                     } else {
                         // Simple Batchim
                         let targetChar = jongChar;
@@ -283,6 +293,14 @@ class KoreanPhonemizer {
             let hSource = null;
             let target = null;
             let direction = null; // 'forward' or 'backward'
+
+            // ㅎ + ㅅ → ㅆ (좋습니다 → [조씀니다], 많소 → [만쏘])
+            if (['ㅎ', 'ㄶ', 'ㅀ'].includes(currJongChar) && nextChoChar === 'ㅅ') {
+                this.addLog(i, "ㅎ + ㅅ", `ㅎ and ㅅ merge into ㅆ.`);
+                curr.jong = currJongChar === 'ㅎ' ? 0 : this.getJongIndex(currJongChar === 'ㄶ' ? 'ㄴ' : 'ㄹ');
+                next.cho = this.getChoIndex('ㅆ');
+                continue;
+            }
 
             // Forward: ㅎ + Stop
             if (['ㅎ', 'ㄶ', 'ㅀ'].includes(currJongChar) && ['ㄱ', 'ㄷ', 'ㅂ', 'ㅈ'].includes(nextChoChar)) {
@@ -358,11 +376,16 @@ class KoreanPhonemizer {
             const rep = this.toRepresentative(JONGSEONG[curr.jong]);
             const nextCho = CHOSEONG[next.cho];
 
-            // Condition: P, T, or K sound (Obstruents)
-            if (['ㄱ', 'ㄷ', 'ㅂ'].includes(rep)) {
+            // Verb stems ending in ㄵ, ㄻ, ㄼ, ㄾ also harden the next consonant (앉다 → [안따], 넓다 → [널따])
+            const jongChar = JONGSEONG[curr.jong];
+            const stemCluster = ['ㄵ', 'ㄻ', 'ㄼ', 'ㄾ'].includes(jongChar);
+
+            // Condition: P, T, or K sound (Obstruents), or one of the clusters above
+            if (['ㄱ', 'ㄷ', 'ㅂ'].includes(rep) || stemCluster) {
                 const map = { 'ㄱ': 'ㄲ', 'ㄷ': 'ㄸ', 'ㅂ': 'ㅃ', 'ㅅ': 'ㅆ', 'ㅈ': 'ㅉ' };
                 if (map[nextCho]) {
-                    this.addLog(i + 1, "Tensification", `Initial ${nextCho} hardens to ${map[nextCho]} after stop sound.`);
+                    const why = stemCluster ? `after the stem ending ${jongChar}` : 'after a stop sound';
+                    this.addLog(i + 1, "Tensification", `Initial ${nextCho} hardens to ${map[nextCho]} ${why}.`);
                     next.cho = this.getChoIndex(map[nextCho]);
                 }
             }
@@ -462,7 +485,25 @@ class KoreanPhonemizer {
             // e.g. 닭 -> 닭 (No change logged).
             // We should change it to 닥 for pronunciation.
 
-            const rep = this.toRepresentative(char);
+            let rep = this.toRepresentative(char);
+            const next = ctx[i + 1];
+            const nextCho = next && next.type === 'HANGUL' ? CHOSEONG[next.cho] : null;
+
+            // ㄺ before ㄱ is [ㄹ] (in verbs: 읽고 → [일꼬], 맑게 → [말께])
+            if (char === 'ㄺ' && (nextCho === 'ㄱ' || nextCho === 'ㄲ')) {
+                rep = 'ㄹ';
+                this.addLog(i, "Simplification", `ㄺ is pronounced ㄹ before ㄱ.`);
+                curr.jong = this.getJongIndex(rep);
+                continue;
+            }
+            // 밟 before a consonant is [밥] (밟다 → [밥따]), unlike other ㄼ words (넓다 → [널따])
+            if (char === 'ㄼ' && curr.original === '밟') {
+                rep = 'ㅂ';
+                this.addLog(i, "Simplification", `In 밟-, ㄼ is pronounced ㅂ (an exception).`);
+                curr.jong = this.getJongIndex(rep);
+                continue;
+            }
+
             if (rep !== char) {
                 // Check context: if we are at end, or we didn't link.
                 // We know we didn't link if we are here and jong is not 0 (because link sets jong to 0).
@@ -495,7 +536,7 @@ class KoreanPhonemizer {
         if (['ㄱ', 'ㄲ', 'ㄳ', 'ㄺ', 'ㅋ'].includes(jongChar)) return 'ㄱ';
         if (['ㄴ', 'ㄵ', 'ㄶ'].includes(jongChar)) return 'ㄴ';
         if (['ㄷ', 'ㅅ', 'ㅆ', 'ㅈ', 'ㅊ', 'ㅌ', 'ㅎ', 'ㄸ', 'ㅉ'].includes(jongChar)) return 'ㄷ'; // ㄸ, ㅉ not standard batchim but possible in typos
-        if (['ㄹ', 'ㄽ', 'ㄾ', 'ㅀ', 'ㄼ'].includes(jongChar)) return 'ㄹ'; // Exception: 밟 -> 밥
+        if (['ㄹ', 'ㄽ', 'ㄾ', 'ㅀ', 'ㄼ'].includes(jongChar)) return 'ㄹ'; // 밟 is handled in applyFinalNormalization
         if (['ㅁ', 'ㄻ'].includes(jongChar)) return 'ㅁ';
         if (['ㅂ', 'ㅄ', 'ㄿ', 'ㅍ'].includes(jongChar)) return 'ㅂ';
         if (['ㅇ'].includes(jongChar)) return 'ㅇ';
@@ -534,6 +575,20 @@ class HangulAssembler {
     clear() {
         this.buffer = [];
         return "";
+    }
+
+    // Load existing text as keystrokes, so on-screen typing continues from it
+    setText(text) {
+        const splitVowel = { 'ㅘ': 'ㅗㅏ', 'ㅙ': 'ㅗㅐ', 'ㅚ': 'ㅗㅣ', 'ㅝ': 'ㅜㅓ', 'ㅞ': 'ㅜㅔ', 'ㅟ': 'ㅜㅣ', 'ㅢ': 'ㅡㅣ' };
+        const splitFinal = { 'ㄳ': 'ㄱㅅ', 'ㄵ': 'ㄴㅈ', 'ㄶ': 'ㄴㅎ', 'ㄺ': 'ㄹㄱ', 'ㄻ': 'ㄹㅁ', 'ㄼ': 'ㄹㅂ', 'ㄽ': 'ㄹㅅ', 'ㄾ': 'ㄹㅌ', 'ㄿ': 'ㄹㅍ', 'ㅀ': 'ㄹㅎ', 'ㅄ': 'ㅂㅅ' };
+        this.buffer = [];
+        for (const char of text) {
+            const d = decompose(char);
+            if (!d) { this.buffer.push(char); continue; }
+            const v = JUNGSEONG[d.jung], j = JONGSEONG[d.jong];
+            this.buffer.push(CHOSEONG[d.cho], ...(splitVowel[v] || v));
+            if (j) this.buffer.push(...(splitFinal[j] || j));
+        }
     }
 
     assemble() {
@@ -678,5 +733,7 @@ class HangulAssembler {
     }
 }
 
-// Export for usage
-// window.KoreanPhonemizer = KoreanPhonemizer;
+// Export for Node (used by the tests); browsers use the globals above
+if (typeof module !== 'undefined') {
+    module.exports = { KoreanPhonemizer, HangulAssembler, COMMON_EXCEPTIONS };
+}
